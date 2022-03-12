@@ -42,6 +42,7 @@ def get_current_weather(details_or_no):
     wind = ' '.join(details[7:])
     description = ' '.join(soup1.find(class_="forecast-line__legend--text").text.split())
     return get_description(temperature, description, rain_risk, feeling, wind, details_or_no, day)
+print(get_current_weather("Oui"))
 
 
 def get_joke():
@@ -97,7 +98,7 @@ def run():
         a = get_vocal_to_string().split()
         for i in a:
             if i in listsOfCommands.weather_commands:
-                spell_answers(get_current_weather("oui"))
+                spell_answers(get_current_weather("Oui"))
             elif i in listsOfCommands.date_commands:
                 spell_answers(get_current_date())
             elif i in listsOfCommands.joke_commands:
