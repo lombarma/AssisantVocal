@@ -2,7 +2,6 @@ import datetime
 from bs4 import BeautifulSoup
 import requests as req
 import pyjokes
-from twilio.rest import Client
 import wikipediaapi
 import speech_recognition as sr
 import pyaudio
@@ -49,21 +48,6 @@ def get_joke():
     return pyjokes.get_joke()
 
 
-def sending_message_to_me(body):
-    # Your Account SID from twilio.com/console
-    account_sid = "AC0f32322176d47881fb6689b31849bbb1"
-    # Your Auth Token from twilio.com/console
-    auth_token = "c82c54afdbdc6e5b8026632a6f97cd8b"
-
-    client = Client(account_sid, auth_token)
-
-    message = client.messages.create(
-        to="+33781512175",
-        from_="+12346353527",
-        body=body)
-    print("Message envoyé !")
-
-
 def get_definition_from_wikipedia(topic):
     wiki_wiki = wikipediaapi.Wikipedia('fr')
     page_py = wiki_wiki.page(topic)
@@ -72,26 +56,34 @@ def get_definition_from_wikipedia(topic):
 
 def get_vocal_to_string():
     r = sr.Recognizer()
-
     micro = sr.Microphone()
-
     with micro as source:
-        print("Speak!")
+        print("Je vous écoute !")
         audio_data = r.listen(source)
-        print("End!")
+        print("Analyse en cours...")
     result = r.recognize_google(audio_data, language="fr-FR")
     return result
 
 
 def spell_answers(answer):
+    print(answer)
     engine = pyttsx3.init()
     engine.say(answer)
     engine.runAndWait()
 
-if __name__ == "__main__":
-    for i in get_vocal_to_string().split():
+
+def run():
+    a = get_vocal_to_string().split()
+    for i in a:
         if i in listsOfCommands.weather_commands:
-            print(get_current_weather("Oui"))
             spell_answers(get_current_weather("Oui"))
+        elif i in listsOfCommands.date_commands:
+            spell_answers(get_current_date())
+        elif i in listsOfCommands.joke_commands:
+            spell_answers(get_joke())
+        elif i in listsOfCommands.wiki_commands:
+            spell_answers(get_definition_from_wikipedia(a[-1]))
 
 
+if __name__ == "__main__":
+    run()
