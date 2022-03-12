@@ -48,10 +48,28 @@ def get_joke():
     return pyjokes.get_joke()
 
 
-def get_definition_from_wikipedia(topic):
+def get_definition_from_wikipedia(topic, state = False):
     wiki_wiki = wikipediaapi.Wikipedia('fr')
     page_py = wiki_wiki.page(topic)
-    return page_py.summary
+    if not state:
+        return page_py.summary[0:60]
+    elif state:
+        return page_py.summary[60:]
+    #print(page_py.summary[0:60])
+    #if state :return page_py.summary[60:]
+
+
+def get_calcul(calcul):
+    calcul = calcul.split()
+    if calcul[1] in listsOfCommands.mult_commands:
+        calcul[1] = "*"
+    elif calcul[1] in listsOfCommands.addition_commands:
+        calcul[1] = "+"
+    elif calcul[1] in listsOfCommands.soustraction_commands:
+        calcul[1] = "-"
+    elif calcul[1] in listsOfCommands.division_commands:
+        calcul[1] = "/"
+    return f"Le résultat est : {round(eval(' '.join(calcul)), 2)}"
 
 
 def get_vocal_to_string():
@@ -62,7 +80,8 @@ def get_vocal_to_string():
         audio_data = r.listen(source)
         print("Analyse en cours...")
     result = r.recognize_google(audio_data, language="fr-FR")
-    return result
+    print(result)
+    return result.lower()
 
 
 def spell_answers(answer):
@@ -73,16 +92,29 @@ def spell_answers(answer):
 
 
 def run():
-    a = get_vocal_to_string().split()
-    for i in a:
-        if i in listsOfCommands.weather_commands:
-            spell_answers(get_current_weather("Oui"))
-        elif i in listsOfCommands.date_commands:
-            spell_answers(get_current_date())
-        elif i in listsOfCommands.joke_commands:
-            spell_answers(get_joke())
-        elif i in listsOfCommands.wiki_commands:
-            spell_answers(get_definition_from_wikipedia(a[-1]))
+    arret = True
+    while arret:
+        a = get_vocal_to_string().split()
+        for i in a:
+            if i in listsOfCommands.weather_commands:
+                spell_answers(get_current_weather("oui"))
+            elif i in listsOfCommands.date_commands:
+                spell_answers(get_current_date())
+            elif i in listsOfCommands.joke_commands:
+                spell_answers(get_joke())
+            elif i in listsOfCommands.wiki_commands:
+                spell_answers(get_definition_from_wikipedia(a[-1]))
+                spell_answers("Dois-je vous en dire plus ?")
+                if get_vocal_to_string() in listsOfCommands.affirmation_commands:
+                    spell_answers(get_definition_from_wikipedia(a[-1], state = True))
+                else:
+                    spell_answers("D'accord !")
+            elif i in listsOfCommands.calc_commands:
+                spell_answers("Quel calcul voulez vous faire ?")
+                spell_answers(get_calcul(get_vocal_to_string()))
+            elif i in listsOfCommands.stop_commands:
+                print("A bientôt j'espère.")
+                arret = False
 
 
 if __name__ == "__main__":
