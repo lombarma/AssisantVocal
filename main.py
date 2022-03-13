@@ -1,16 +1,25 @@
 import datetime
 from bs4 import BeautifulSoup
 import requests as req
-import pyjokes
 import wikipediaapi
 import speech_recognition as sr
 import pyaudio
 import listsOfCommands
 import pyttsx3
+from random import choice
+from time import sleep
+
+FILENAME_JOKES = "./data/blagues.csv"
 
 MONTHS = dict([("01", "janvier"), ("02", "février"), ("03", "mars"), ("04", "avril"), ("05", "mai"),
                ("06", "juin"), ("07", "juillet"), ("08", "août"), ("09", "septembre"),
                ("10", "octobre"), ("11", "novembre"), ("12", "décembre")])
+
+
+def readfile(filename):
+    with open(filename, mode='r', encoding='windows-1252') as file:
+        file = file.read().split(";")
+        return file
 
 
 def get_current_date():
@@ -42,35 +51,34 @@ def get_current_weather(details_or_no):
     wind = ' '.join(details[7:])
     description = ' '.join(soup1.find(class_="forecast-line__legend--text").text.split())
     return get_description(temperature, description, rain_risk, feeling, wind, details_or_no, day)
-print(get_current_weather("Oui"))
 
 
 def get_joke():
-    return pyjokes.get_joke()
+    return choice(readfile(FILENAME_JOKES))
 
 
-def get_definition_from_wikipedia(topic, state = False):
+def get_definition_from_wikipedia(topic, state=False):
     wiki_wiki = wikipediaapi.Wikipedia('fr')
     page_py = wiki_wiki.page(topic)
     if not state:
         return page_py.summary[0:60]
     elif state:
         return page_py.summary[60:]
-    #print(page_py.summary[0:60])
-    #if state :return page_py.summary[60:]
+    # print(page_py.summary[0:60])
+    # if state :return page_py.summary[60:]
 
 
-def get_calcul(calcul):
-    calcul = calcul.split()
-    if calcul[1] in listsOfCommands.mult_commands:
-        calcul[1] = "*"
-    elif calcul[1] in listsOfCommands.addition_commands:
-        calcul[1] = "+"
-    elif calcul[1] in listsOfCommands.soustraction_commands:
-        calcul[1] = "-"
-    elif calcul[1] in listsOfCommands.division_commands:
-        calcul[1] = "/"
-    return f"Le résultat est : {round(eval(' '.join(calcul)), 2)}"
+def get_calcul(calcul):  # ex calcul = "combien font 3 x 5"
+    operation = calcul[-3:]
+    if operation[1] in listsOfCommands.mult_commands:
+        operation[1] = "*"
+    elif operation[1] in listsOfCommands.addition_commands:
+        operation[1] = "+"
+    elif operation[1] in listsOfCommands.soustraction_commands:
+        operation[1] = "-"
+    elif operation[1] in listsOfCommands.division_commands:
+        operation[1] = "/"
+    return f"Le résultat est : {round(eval(' '.join(operation)), 2)}"
 
 
 def get_vocal_to_string():
@@ -79,9 +87,10 @@ def get_vocal_to_string():
     with micro as source:
         print("Je vous écoute !")
         audio_data = r.listen(source)
-        print("Analyse en cours...")
     result = r.recognize_google(audio_data, language="fr-FR")
     print(result)
+    sleep(1)
+    print("Analyse en cours...")
     return result.lower()
 
 
@@ -107,12 +116,11 @@ def run():
                 spell_answers(get_definition_from_wikipedia(a[-1]))
                 spell_answers("Dois-je vous en dire plus ?")
                 if get_vocal_to_string() in listsOfCommands.affirmation_commands:
-                    spell_answers(get_definition_from_wikipedia(a[-1], state = True))
+                    spell_answers(get_definition_from_wikipedia(a[-1], state=True))
                 else:
                     spell_answers("D'accord !")
             elif i in listsOfCommands.calc_commands:
-                spell_answers("Quel calcul voulez vous faire ?")
-                spell_answers(get_calcul(get_vocal_to_string()))
+                spell_answers(get_calcul(a))
             elif i in listsOfCommands.stop_commands:
                 print("A bientôt j'espère.")
                 arret = False
@@ -120,3 +128,14 @@ def run():
 
 if __name__ == "__main__":
     run()
+
+"""
+- Calculatrice : OK
+- Météo : Fonctionne mais à revoir
+- Date : OK
+- Heure : à faire
+- Blagues : OK mais trouver liste en français
+- Wikipedia : OK mais fonctionne juste pour les définitions, et le "oui" de dois-je vous en dire plus ne marche pas
+- Stop : OK
+
+"""

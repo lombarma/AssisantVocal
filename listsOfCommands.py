@@ -11,7 +11,7 @@ joke_commands = ["blague", "rire", "drôle"]
 wiki_commands = ["cherche", "définition", "definition", "trouve", "signification", "comment s'appelle", "informations"]
 
 #  Commands to do a calcul
-calc_commands = ["calculatrice", "calcul", "calculer", "ouvre la calculatrice"]
+calc_commands = ["résoud", "resoud", "résouds", "calcule", "calculer", "calcul", "font", "calcule-moi"]
 mult_commands = ["fois", "multiplié par", "multiplier par", "x", " x "]
 addition_commands = [" + ", "+", "plus"]
 soustraction_commands = ["-", " - ", "moins"]
