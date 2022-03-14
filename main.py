@@ -8,6 +8,7 @@ import listsOfCommands
 import pyttsx3
 from random import choice
 from time import sleep
+from requests_html import HTMLSession
 
 FILENAME_JOKES = "./data/blagues.csv"
 
@@ -19,7 +20,7 @@ MONTHS = dict([("01", "janvier"), ("02", "février"), ("03", "mars"), ("04", "av
 def readfile(filename):
     with open(filename, mode='r', encoding='windows-1252') as file:
         file = file.read().split(";")
-        return file
+    return file
 
 
 def get_current_date():
@@ -51,6 +52,21 @@ def get_current_weather(details_or_no):
     wind = ' '.join(details[7:])
     description = ' '.join(soup1.find(class_="forecast-line__legend--text").text.split())
     return get_description(temperature, description, rain_risk, feeling, wind, details_or_no, day)
+
+
+def get_code_source(url):
+    try:
+        session = HTMLSession()
+        response = session.get(url)
+        return response
+
+    except req.exceptions.RequestException as e:
+        print(e)
+
+
+def get_informations_of_somebody(somebody):
+    soup = BeautifulSoup(get_code_source(f"https://www.google.com/search?q={somebody}").text, 'html.parser')
+
 
 
 def get_joke():
